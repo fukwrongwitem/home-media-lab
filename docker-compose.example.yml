@@ -320,7 +320,7 @@ services:
     profiles: ["dns", "full"]
     environment:
       - TZ=${TZ:-America/Los_Angeles}
-      - FTLCONF_webserver_api_password=${PIHOLE_PASSWORD:-changeme}
+      - FTLCONF_webserver_api_password=CHANGE_ME
       - FTLCONF_dns_listeningMode=ALL
       - FTLCONF_dns_upstreams=unbound
     volumes:
