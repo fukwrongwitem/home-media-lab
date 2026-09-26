@@ -1,0 +1,410 @@
+# Portable home media server stack (Docker Compose).
+# Run on a gaming PC now; copy this whole folder later to a dedicated machine.
+# Host today: DESKTOP-FH9KSH7 â€” ~16 GB RAM, AMD Radeon RX 9060 XT.
+# Paths (CONFIG_ROOT / MEDIA_ROOT / DOWNLOADS_ROOT) default to ./ relative to this file.
+#
+# Profiles (RAM-friendly on a gaming PC):
+#   core     â€” jellyfin, qbittorrent, prowlarr, sonarr, radarr, flaresolverr
+#   requests - jellyseerr
+#   dashboard - homarr
+#   sync      - recyclarr (TRaSH quality sync; run once or cron)
+#   subs     â€” bazarr
+#   music    â€” lidarr, nicotine-plus
+#   dns      — pihole + unbound
+#   compress â€” unmanic (optional HEVC re-encode to shrink library; CPU-heavy)
+#   full     â€” everything (all of the above)
+#
+# Examples:
+#   docker compose --profile core up -d
+#   docker compose --profile full up -d
+#   docker compose --profile core --profile music up -d
+#   docker compose --profile core --profile compress up -d   # only when NOT gaming
+# While gaming, stop heavy optional services:
+#   docker compose --profile full stop nicotine-plus jellyseerr pihole unmanic
+# Prefer compressed sources (x265/HEVC) â€” see docs/space-saving.md
+#
+# Memory limit lines are COMMENTED â€” uncomment only if you need hard caps.
+# Do not set aggressive limits that starve games on 16 GB.
+
+name: home-media-server
+
+networks:
+  media:
+    name: media
+    driver: bridge
+
+services:
+  # â”€â”€â”€ CORE â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  jellyfin:
+    image: jellyfin/jellyfin:latest
+    container_name: jellyfin
+    profiles: ["core", "full"]
+    environment:
+      - TZ=${TZ:-America/Los_Angeles}
+      # Tailscale remote: set in .env to http://<magicdns-or-100.x>:8096 â€” see docs/tailscale.md
+      - JELLYFIN_PublishedServerUrl=${JELLYFIN_PublishedServerUrl:-}
+    volumes:
+      - ${CONFIG_ROOT}/jellyfin:/config
+      - ${MEDIA_ROOT}/movies:/media/movies:ro
+      - ${MEDIA_ROOT}/tv:/media/tv:ro
+      - ${MEDIA_ROOT}/music:/media/music:ro
+      - ./media/movies-overflow:/media/movies2:ro
+      - ./media/tv-overflow:/media/tv2:ro
+      # Optional transcode cache on fast disk:
+      # - ${CONFIG_ROOT}/jellyfin-cache:/cache
+    ports:
+      - "${JELLYFIN_PORT:-8096}:8096"
+      - "${JELLYFIN_HTTPS_PORT:-8920}:8920"
+    # AMD GPU on Docker Desktop Windows: HW transcode via Docker is limited.
+    # Default is software encode (CPU). For AMD AMF HW encode, prefer a native
+    # Windows Jellyfin install, or experiment with WSL2/DX devices later â€”
+    # do NOT expect NVIDIA-style --gpus / device blocks to work on this host.
+    # devices: []
+    networks:
+      - media
+    restart: unless-stopped
+    # deploy:
+    #   resources:
+    #     limits:
+    #       memory: 2G
+
+  qbittorrent:
+    image: lscr.io/linuxserver/qbittorrent:latest
+    container_name: qbittorrent
+    profiles: ["core", "full"]
+    environment:
+      - PUID=${PUID:-1000}
+      - PGID=${PGID:-1000}
+      - TZ=${TZ:-America/Los_Angeles}
+      - WEBUI_PORT=${QBIT_WEBUI_PORT:-8080}
+    volumes:
+      - ${CONFIG_ROOT}/qbittorrent:/config
+      - ${DOWNLOADS_ROOT}:/downloads
+    ports:
+      - "${QBIT_WEBUI_PORT:-8080}:8080"
+      - "${QBIT_BT_PORT:-6881}:6881"
+      - "${QBIT_BT_PORT:-6881}:6881/udp"
+    networks:
+      - media
+    restart: unless-stopped
+    # deploy:
+    #   resources:
+    #     limits:
+    #       memory: 1G
+
+  prowlarr:
+    image: lscr.io/linuxserver/prowlarr:latest
+    container_name: prowlarr
+    profiles: ["core", "full"]
+    environment:
+      - PUID=${PUID:-1000}
+      - PGID=${PGID:-1000}
+      - TZ=${TZ:-America/Los_Angeles}
+    volumes:
+      - ${CONFIG_ROOT}/prowlarr:/config
+    ports:
+      - "${PROWLARR_PORT:-9696}:9696"
+    networks:
+      - media
+    restart: unless-stopped
+    # deploy:
+    #   resources:
+    #     limits:
+    #       memory: 512M
+
+  sonarr:
+    image: lscr.io/linuxserver/sonarr:latest
+    container_name: sonarr
+    profiles: ["core", "full"]
+    environment:
+      - PUID=${PUID:-1000}
+      - PGID=${PGID:-1000}
+      - TZ=${TZ:-America/Los_Angeles}
+    volumes:
+      - ${CONFIG_ROOT}/sonarr:/config
+      - ${MEDIA_ROOT}/tv:/tv
+      - ./media/tv-overflow:/tv2
+      - ${DOWNLOADS_ROOT}:/downloads
+    ports:
+      - "${SONARR_PORT:-8989}:8989"
+    networks:
+      - media
+    depends_on:
+      - qbittorrent
+      - prowlarr
+    restart: unless-stopped
+    # deploy:
+    #   resources:
+    #     limits:
+    #       memory: 768M
+
+  radarr:
+    image: lscr.io/linuxserver/radarr:latest
+    container_name: radarr
+    profiles: ["core", "full"]
+    environment:
+      - PUID=${PUID:-1000}
+      - PGID=${PGID:-1000}
+      - TZ=${TZ:-America/Los_Angeles}
+    volumes:
+      - ${CONFIG_ROOT}/radarr:/config
+      - ${MEDIA_ROOT}/movies:/movies
+      - ./media/movies-overflow:/movies2
+      - ${DOWNLOADS_ROOT}:/downloads
+    ports:
+      - "${RADARR_PORT:-7878}:7878"
+    networks:
+      - media
+    depends_on:
+      - qbittorrent
+      - prowlarr
+    restart: unless-stopped
+    # deploy:
+    #   resources:
+    #     limits:
+    #       memory: 768M
+
+  flaresolverr:
+    image: ghcr.io/flaresolverr/flaresolverr:latest
+    container_name: flaresolverr
+    profiles: ["core", "full"]
+    environment:
+      - LOG_LEVEL=${FLARESOLVERR_LOG_LEVEL:-info}
+      - LOG_HTML=false
+      - TZ=${TZ:-America/Los_Angeles}
+    ports:
+      - "${FLARESOLVERR_PORT:-8191}:8191"
+    networks:
+      - media
+    restart: unless-stopped
+    # deploy:
+    #   resources:
+    #     limits:
+    #       memory: 512M
+
+  # â”€â”€â”€ REQUESTS â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  # Jellyseerr = Overseerr fork for Jellyfin/Emby (Overseerr is Plex-first)
+  jellyseerr:
+    image: fallenbagel/jellyseerr:latest
+    container_name: jellyseerr
+    profiles: ["requests", "full"]
+    environment:
+      - PUID=${PUID:-1000}
+      - PGID=${PGID:-1000}
+      - TZ=${TZ:-America/Los_Angeles}
+      - LOG_LEVEL=info
+    volumes:
+      - ${CONFIG_ROOT}/jellyseerr:/app/config
+    ports:
+      - "${JELLYSEERR_PORT:-5055}:5055"
+    networks:
+      - media
+    depends_on:
+      - sonarr
+      - radarr
+    restart: unless-stopped
+
+  bazarr:
+    image: lscr.io/linuxserver/bazarr:latest
+    container_name: bazarr
+    profiles: ["subs", "full"]
+    environment:
+      - PUID=${PUID:-1000}
+      - PGID=${PGID:-1000}
+      - TZ=${TZ:-America/Los_Angeles}
+    volumes:
+      - ${CONFIG_ROOT}/bazarr:/config
+      - ${MEDIA_ROOT}/movies:/movies
+      - ${MEDIA_ROOT}/tv:/tv
+    ports:
+      - "${BAZARR_PORT:-6767}:6767"
+    networks:
+      - media
+    depends_on:
+      - sonarr
+      - radarr
+    restart: unless-stopped
+    # deploy:
+    #   resources:
+    #     limits:
+    #       memory: 512M
+
+  # â”€â”€â”€ MUSIC â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  lidarr:
+    image: lscr.io/linuxserver/lidarr:latest
+    container_name: lidarr
+    profiles: ["music", "full"]
+    environment:
+      - PUID=${PUID:-1000}
+      - PGID=${PGID:-1000}
+      - TZ=${TZ:-America/Los_Angeles}
+    volumes:
+      - ${CONFIG_ROOT}/lidarr:/config
+      - ${MEDIA_ROOT}/music:/music
+      - ${DOWNLOADS_ROOT}:/downloads
+    ports:
+      - "${LIDARR_PORT:-8686}:8686"
+    networks:
+      - media
+    depends_on:
+      - qbittorrent
+      - prowlarr
+    restart: unless-stopped
+    # deploy:
+    #   resources:
+    #     limits:
+    #       memory: 768M
+
+  # Maintained Nicotine+ image (Soulseek GUI via browser / Selkies)
+  # https://github.com/fletchto99/nicotine-plus-docker
+  nicotine-plus:
+    image: ghcr.io/fletchto99/nicotine-plus-docker:latest
+    container_name: nicotine-plus
+    profiles: ["music", "full"]
+    environment:
+      - PUID=${PUID:-1000}
+      - PGID=${PGID:-1000}
+      - TZ=${TZ:-America/Los_Angeles}
+    volumes:
+      - ${CONFIG_ROOT}/nicotine-plus:/config
+      - ${DOWNLOADS_ROOT}/complete/soulseek:/data/downloads
+      - ${DOWNLOADS_ROOT}/incomplete/soulseek:/data/incomplete_downloads
+      # Optional: share completed music into Lidarr's library root after sorting
+      - ${MEDIA_ROOT}/music:/data/music
+    ports:
+      # Prefer HTTPS UI on 6081 (Selkies); 6080 may be HTTP depending on image tag
+      - "${NICOTINE_HTTP_PORT:-6080}:6080"
+      - "${NICOTINE_HTTPS_PORT:-6081}:6081"
+      - 2234-2239:2234-2239
+    shm_size: "1gb"
+    networks:
+      - media
+    restart: unless-stopped
+    # Heavier GUI container â€” stop while gaming if RAM is tight:
+    #   docker compose stop nicotine-plus
+    # deploy:
+    #   resources:
+    #     limits:
+    #       memory: 1G
+
+  # â”€â”€â”€ DNS / ADS â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  # Pi-hole on Docker Desktop (Windows) caveats:
+  # - Publishing 53/tcp+udp often conflicts with Windows/ICS/Hyper-V DNS.
+  # - Host networking is NOT like Linux; do not use network_mode: host.
+  # - Point router DNS to this PC's LAN IP only when the container is running.
+  # - Gaming VPNs (and some anti-cheat) may override DNS â€” expect conflicts.
+
+  # Unbound (NLnetLabs recursive resolver via klutchell/unbound image).
+  # No host ports published — only Pi-hole exposes 53 to the LAN.
+  # Custom conf snippets: ${CONFIG_ROOT}/unbound -> /etc/unbound/custom.conf.d
+  unbound:
+    image: klutchell/unbound
+    container_name: unbound
+    profiles: ["dns", "full"]
+    volumes:
+      - ${CONFIG_ROOT}/unbound:/etc/unbound/custom.conf.d
+    networks:
+      - media
+    restart: unless-stopped
+    healthcheck:
+      # Use the drill wrapper binary to reduce the exit codes to 0 or 1 for healthchecks
+      test: ["CMD", "drill-hc", "@127.0.0.1", "dnssec.works"]
+      interval: 30s
+      timeout: 30s
+      retries: 3
+      start_period: 30s
+
+  pihole:
+    image: pihole/pihole:latest
+    container_name: pihole
+    profiles: ["dns", "full"]
+    environment:
+      - TZ=${TZ:-America/Los_Angeles}
+      - FTLCONF_webserver_api_password=${PIHOLE_PASSWORD:-changeme}
+      - FTLCONF_dns_listeningMode=ALL
+      - FTLCONF_dns_upstreams=unbound
+    volumes:
+      - ${CONFIG_ROOT}/pihole/etc-pihole:/etc/pihole
+      - ${CONFIG_ROOT}/pihole/etc-dnsmasq.d:/etc/dnsmasq.d
+    ports:
+      - "${PIHOLE_DNS_PORT:-53}:53/tcp"
+      - "${PIHOLE_DNS_PORT:-53}:53/udp"
+      - "${PIHOLE_WEB_PORT:-8053}:80"
+    networks:
+      - media
+    depends_on:
+      - unbound
+    restart: unless-stopped
+    # deploy:
+    #   resources:
+    #     limits:
+    #       memory: 512M
+    cap_add:
+      - NET_ADMIN
+
+  # â”€â”€â”€ COMPRESS (SSD space) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  # Optional post-library re-encode to HEVC. Prefer grabbing x265/WEB already
+  # (docs/space-saving.md). Run ONLY when not gaming â€” software encode hammers
+  # CPU/RAM on ~16 GB. AMD HW encode via Docker Desktop on Windows is limited;
+  # expect CPU encode here. On a future Linux box you can try /dev/dri.
+  # UI: http://localhost:8888
+  unmanic:
+    image: josh5/unmanic:latest
+    container_name: unmanic
+    profiles: ["compress", "full"]
+    environment:
+      - PUID=${PUID:-1000}
+      - PGID=${PGID:-1000}
+      - TZ=${TZ:-America/Los_Angeles}
+    volumes:
+      - ${CONFIG_ROOT}/unmanic:/config
+      - ${MEDIA_ROOT}:/library
+      - ${DOWNLOADS_ROOT}/unmanic-cache:/tmp/unmanic
+    ports:
+      - "${UNMANIC_PORT:-8888}:8888"
+    networks:
+      - media
+    restart: unless-stopped
+    # deploy:
+    #   resources:
+    #     limits:
+    #       memory: 2G
+
+  # --- DASHBOARD -----------------------------------------------------------
+  # Homarr: self-hosted dashboard for the stack. UI: http://localhost:7575
+  # Generate key once: openssl rand -hex 32 (stored in .env HOMARR_SECRET_ENCRYPTION_KEY)
+  homarr:
+    image: ghcr.io/homarr-labs/homarr:latest
+    container_name: homarr
+    profiles: ["dashboard", "requests", "full"]
+    environment:
+      - TZ=${TZ:-America/Los_Angeles}
+      - SECRET_ENCRYPTION_KEY=${HOMARR_SECRET_ENCRYPTION_KEY:?set HOMARR_SECRET_ENCRYPTION_KEY in .env}
+    volumes:
+      - ${CONFIG_ROOT}/homarr:/appdata
+      # Optional Docker integration (Docker Desktop on Windows uses named pipe; may be limited)
+      # - //var/run/docker.sock:/var/run/docker.sock
+    ports:
+      - "${HOMARR_PORT:-7575}:7575"
+    networks:
+      - media
+    restart: unless-stopped
+
+  # --- SYNC (TRaSH Guides -> Sonarr/Radarr) --------------------------------
+  # Recyclarr: sync quality profiles/custom formats. Not always-on needed -
+  # prefer: docker compose --profile sync run --rm recyclarr sync
+  # Cron inside image also works if left running with restart.
+  recyclarr:
+    image: ghcr.io/recyclarr/recyclarr:8
+    container_name: recyclarr
+    profiles: ["sync", "full"]
+    user: "${PUID:-1000}:${PGID:-1000}"
+    environment:
+      - TZ=${TZ:-America/Los_Angeles}
+    volumes:
+      - ${CONFIG_ROOT}/recyclarr:/config
+    networks:
+      - media
+    # depends_on omitted: sonarr/radarr are under profile "core"; start them first
+    # or run: docker compose --profile core --profile sync run --rm recyclarr sync
+    restart: unless-stopped
