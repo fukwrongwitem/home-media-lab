@@ -47,7 +47,7 @@ Gaming PC (Windows 11 + Docker Desktop / WSL2)
 ## Repo contents
 
 - Sanitized `docker-compose` / `.env.example` (no secrets)
-- Architecture and ops docs (`docs/`)
+- Architecture and ops docs (`docs/`), including local URLs without custom router DNS
 - Changelog of milestones suitable for interviews
 
 > **Privacy:** Do not commit real `.env`, API keys, or download-client credentials.

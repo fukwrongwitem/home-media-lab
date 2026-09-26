@@ -1,5 +1,10 @@
 # Changelog
 
+## 2026-09 — Local access without custom router DNS
+- Documented Homarr / stack URLs via `127.0.0.1` (and LAN IP for other devices)
+- Noted Docker Desktop hairpin + Homarr tile ping URLs on the compose network
+- Confirmed dashboards work with ISP DNS; Pi-hole/dnsproxy optional for UI access
+
 ## 2026-09 — Windows Docker DNS on :53 via host dnsproxy
 - Pi-hole DNS published only as `127.0.0.1:5053` (avoids Docker Desktop / ICS conflict on LAN UDP/TCP 53)
 - Documented AdGuard dnsproxy on the host (`:53` → `127.0.0.1:5053`), WSL mirrored networking, Private Ethernet + firewall notes
