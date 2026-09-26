@@ -289,13 +289,15 @@ services:
 
   # â”€â”€â”€ DNS / ADS â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   # Pi-hole on Docker Desktop (Windows) caveats:
-  # - Publishing 53/tcp+udp often conflicts with Windows/ICS/Hyper-V DNS.
+  # - Publishing 53/tcp+udp conflicts with Windows ICS / Hyper-V / Docker Desktop DNS.
+  # - Workaround: publish Pi-hole DNS only on 127.0.0.1:5053; run AdGuard dnsproxy
+  #   on the host listening on :53 and forwarding to 127.0.0.1:5053 (see docs/dns.md).
   # - Host networking is NOT like Linux; do not use network_mode: host.
-  # - Point router DNS to this PC's LAN IP only when the container is running.
-  # - Gaming VPNs (and some anti-cheat) may override DNS â€” expect conflicts.
+  # - Point router LAN DHCP DNS at this PC's LAN IP only while dnsproxy + dns profile run.
+  # - Gaming VPNs (and some anti-cheat) may override DNS — expect conflicts.
 
   # Unbound (NLnetLabs recursive resolver via klutchell/unbound image).
-  # No host ports published — only Pi-hole exposes 53 to the LAN.
+  # No host ports — Pi-hole DNS is published on 127.0.0.1:5053 only (see docs/dns.md).
   # Custom conf snippets: ${CONFIG_ROOT}/unbound -> /etc/unbound/custom.conf.d
   unbound:
     image: klutchell/unbound
@@ -327,8 +329,9 @@ services:
       - ${CONFIG_ROOT}/pihole/etc-pihole:/etc/pihole
       - ${CONFIG_ROOT}/pihole/etc-dnsmasq.d:/etc/dnsmasq.d
     ports:
-      - "${PIHOLE_DNS_PORT:-53}:53/tcp"
-      - "${PIHOLE_DNS_PORT:-53}:53/udp"
+      # Windows Docker Desktop: bind DNS to loopback only; host dnsproxy owns LAN :53
+      - "127.0.0.1:5053:53/tcp"
+      - "127.0.0.1:5053:53/udp"
       - "${PIHOLE_WEB_PORT:-8053}:80"
     networks:
       - media

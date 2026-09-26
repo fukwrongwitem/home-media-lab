@@ -19,7 +19,7 @@ This write-up focuses on systems work employers care about: Docker Compose, serv
 | Playback / requests | Jellyfin, Jellyseerr |
 | Automation | Sonarr, Radarr, Bazarr, Prowlarr, FlareSolverr |
 | Downloads | qBittorrent (containerized) |
-| DNS (optional profile) | Pi-hole + Unbound (recursive upstream) |
+| DNS (optional profile) | Pi-hole + Unbound; Windows host dnsproxy for LAN :53 |
 | Music (optional profile) | Lidarr (+ optional Soulseek client) |
 | Compress (optional profile) | Unmanic |
 | Dashboard / QoL | Homarr, Recyclarr |
