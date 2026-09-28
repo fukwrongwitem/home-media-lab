@@ -6,17 +6,19 @@ This write-up focuses on systems work employers care about: Docker Compose, serv
 
 ## Highlights
 
-- **Docker Compose** multi-service stack with **profiles** (`core`, `requests`, `subs`, `music`, `dns`, `compress`, `full`) so the same machine can game and serve media without starting everything at once
+- **Docker Compose** multi-service stack with **profiles** (`core`, `requests`, `subs`, `music`, `dns`, `compress`, `dashboard`, `sync`, `full`) so the same machine can game and serve media without starting everything at once
+- **Gaming Mode**: PowerShell helpers stop download/*arr/CPU-heavy containers while leaving Jellyfin + Pi-hole/Unbound up ([docs/gaming-mode.md](docs/gaming-mode.md))
 - **Portable layout**: one folder (`compose`, `config`, `media`, `downloads`) with relative paths and a migrate guide
-- **Storage split**: app config on a fast volume; bulk library growth on a second drive with secondary mounts into Jellyfin / Sonarr / Radarr
+- **Storage split**: app config on a fast volume; library overflow + download scratch on a second drive ([docs/downloads-layout.md](docs/downloads-layout.md))
+- **Jellyfin ops**: *arr → Jellyfin Connect for timely library updates on Docker Desktop bind mounts; plugins (Enhanced/Seerr, Intro Skipper, Media Bar)
 - **Remote access plan**: Tailscale + Jellyfin `PublishedServerUrl` (no inbound port forwarding)
-- **Ops extras (in progress)**: dashboard (Homarr), quality-profile sync (Recyclarr), optional overnight library compression
+- **Ops extras**: Homarr dashboard, Recyclarr quality-profile sync, optional overnight library compression
 
 ## Stack (high level)
 
 | Area | Services |
 |------|----------|
-| Playback / requests | Jellyfin, Jellyseerr |
+| Playback / requests | Jellyfin (+ plugins), Jellyseerr |
 | Automation | Sonarr, Radarr, Bazarr, Prowlarr, FlareSolverr |
 | Downloads | qBittorrent (containerized) |
 | DNS (optional profile) | Pi-hole + Unbound; Windows host dnsproxy for LAN :53 |
@@ -28,12 +30,12 @@ This write-up focuses on systems work employers care about: Docker Compose, serv
 
 ```text
 Gaming PC (Windows 11 + Docker Desktop / WSL2)
-├── D:  media-server/     # compose, config, primary media, downloads
-└── E:  media-server/     # overflow movies / tv library mounts
-        └─ Tailscale host for remote clients
+├── Primary volume   media-server/   # compose, config, primary media
+├── Secondary volume media-server/   # overflow library + downloads
+└── Tailscale on host for remote Jellyfin clients
 ```
 
-- **RAM-aware**: prefer `--profile core` while gaming (~16 GB host)
+- **RAM-aware**: prefer `--profile core` while gaming (~16 GB host); use Gaming Mode scripts to pause the rest
 - **AMD GPU**: containerized encode is software-first; heavy re-encode kept on an idle/overnight profile
 - **Migration**: pack/scripts + docs for moving the whole tree to a dedicated Linux host later
 
@@ -41,12 +43,15 @@ Gaming PC (Windows 11 + Docker Desktop / WSL2)
 
 1. Designed a profile-based Compose layout for a dual-use PC
 2. Documented first-run wiring, space-saving encode preferences, and Tailscale remote access
-3. Expanded library storage onto a second volume without moving app config
-4. Coordinated ongoing hardening (dashboard, profile sync, backups) with a dedicated Homelab assistant workflow
+3. Expanded library + downloads onto a second volume without moving app config
+4. Built Gaming Mode on/off scripts so streaming/DNS survive game sessions
+5. Fixed Jellyfin library freshness on Docker Desktop (Connect + scan safety net) and added UI plugins (Seerr-in-Jellyfin, Intro Skipper, Media Bar)
+6. Coordinated ongoing hardening with a dedicated Homelab assistant workflow
 
 ## Repo contents
 
 - Sanitized `docker-compose` / `.env.example` (no secrets)
+- `bin/` Gaming Mode PowerShell helpers (relative stack root)
 - Architecture and ops docs (`docs/`), including local URLs without custom router DNS
 - Changelog of milestones suitable for interviews
 

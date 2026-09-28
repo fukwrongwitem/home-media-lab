@@ -5,3 +5,6 @@ media/
 downloads/
 *.bak
 *.bak-*
+
+# Runtime state from Gaming Mode scripts
+bin/.gaming-mode-state.json

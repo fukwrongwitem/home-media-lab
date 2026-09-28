@@ -19,9 +19,9 @@
 #   docker compose --profile full up -d
 #   docker compose --profile core --profile music up -d
 #   docker compose --profile core --profile compress up -d   # only when NOT gaming
-# While gaming, stop heavy optional services:
-#   docker compose --profile full stop nicotine-plus jellyseerr pihole unmanic
-# Prefer compressed sources (x265/HEVC) â€” see docs/space-saving.md
+# While gaming, prefer Gaming Mode (keeps Jellyfin + DNS up):
+#   see docs/gaming-mode.md and bin/gaming-mode-on.ps1
+# Prefer compressed sources (x265/HEVC) — see docs/space-saving.md
 #
 # Memory limit lines are COMMENTED â€” uncomment only if you need hard caps.
 # Do not set aggressive limits that starve games on 16 GB.

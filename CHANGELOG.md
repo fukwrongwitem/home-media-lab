@@ -1,5 +1,25 @@
 # Changelog
 
+## 2026-09 — Jellyfin plugins + Seerr-in-UI
+- Installed Jellyfin Enhanced (Seerr search/request via compose DNS to Jellyseerr), Intro Skipper, Media Bar, and File Transformation
+- Documented community plugin repositories and post-restart client refresh steps
+- See [docs/jellyfin-plugins.md](docs/jellyfin-plugins.md)
+
+## 2026-09 — Gaming Mode for dual-use PC
+- Added PowerShell Gaming Mode on/off scripts that stop download/*arr/CPU-heavy containers while leaving Jellyfin + Pi-hole/Unbound running
+- Desktop shortcut helper; state file records what was paused for clean resume
+- See [docs/gaming-mode.md](docs/gaming-mode.md) and `bin/`
+
+## 2026-09 — Downloads on secondary volume
+- Moved `DOWNLOADS_ROOT` to a second drive; kept container paths (`/downloads`) so Sonarr/Radarr maps stay stable
+- Documented primary vs overflow library + download scratch layout
+- See [docs/downloads-layout.md](docs/downloads-layout.md)
+
+## 2026-09 — Jellyfin library freshness on Docker Desktop
+- Documented unreliable realtime file watchers on Windows bind mounts
+- Wired Sonarr/Radarr → Jellyfin MediaBrowser Connect (path maps over compose DNS) plus hourly library scan safety net
+- See [docs/jellyfin-library-updates.md](docs/jellyfin-library-updates.md)
+
 ## 2026-09 — Local access without custom router DNS
 - Documented Homarr / stack URLs via `127.0.0.1` (and LAN IP for other devices)
 - Noted Docker Desktop hairpin + Homarr tile ping URLs on the compose network
