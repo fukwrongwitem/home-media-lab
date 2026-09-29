@@ -52,7 +52,8 @@ Gaming PC (Windows 11 + Docker Desktop / WSL2)
 
 - Sanitized `docker-compose` / `.env.example` (no secrets)
 - `bin/` Gaming Mode PowerShell helpers (relative stack root)
-- Architecture and ops docs (`docs/`), including local URLs without custom router DNS
+- `scripts/` folder layout + pack-for-move helpers for host migration
+- Architecture and ops docs (`docs/`), including first-run [wire-up](docs/wire-up.md) and local URLs without custom router DNS
 - Changelog of milestones suitable for interviews
 
 > **Privacy:** Do not commit real `.env`, API keys, or download-client credentials.

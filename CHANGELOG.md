@@ -1,5 +1,10 @@
 # Changelog
 
+## 2026-09-29 — First-run wire-up + migrate scripts
+- Published sanitized first-run wire-up guide (Jellyseerr, overflow roots, DNS/Gaming Mode cross-links)
+- Added portable `scripts/init-folders.*` and `scripts/pack-for-move.*` referenced by migrate docs
+- Fixes broken doc links left from the initial portfolio cut
+
 ## 2026-09 — Jellyfin plugins + Seerr-in-UI
 - Installed Jellyfin Enhanced (Seerr search/request via compose DNS to Jellyseerr), Intro Skipper, Media Bar, and File Transformation
 - Documented community plugin repositories and post-restart client refresh steps
