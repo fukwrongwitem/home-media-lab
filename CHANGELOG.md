@@ -1,5 +1,9 @@
 # Changelog
 
+## 2026-09-29 — Household Jellyfin / Jellyseerr roles
+- Documented approver vs request-only access for household users (no passwords in repo)
+- See [docs/jellyfin-users.md](docs/jellyfin-users.md)
+
 ## 2026-09-29 — Wire-up guide + migrate scripts
 - First-run wire-up order for Jellyseerr, overflow roots, DNS, and Gaming Mode
 - Added `scripts/init-folders.*` and `scripts/pack-for-move.*` used by the migrate docs

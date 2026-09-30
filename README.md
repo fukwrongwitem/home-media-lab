@@ -48,7 +48,7 @@ Gaming PC (Windows 11 + Docker Desktop / WSL2)
 - Sanitized `docker-compose.example.yml` and `.env.example` (no secrets)
 - `bin/` — Gaming Mode helpers
 - `scripts/` — folder init + pack-for-move for migration
-- `docs/` — ops notes (start with [wire-up.md](docs/wire-up.md) and [local-access.md](docs/local-access.md))
+- `docs/` — ops notes (start with [wire-up.md](docs/wire-up.md), [local-access.md](docs/local-access.md), [jellyfin-users.md](docs/jellyfin-users.md))
 - [CHANGELOG.md](CHANGELOG.md)
 
 **Privacy:** don’t commit a real `.env`, API keys, or download-client passwords.
