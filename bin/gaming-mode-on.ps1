@@ -1,7 +1,7 @@
 #Requires -Version 5.1
 <#
 .SYNOPSIS
-  Homelab Gaming Mode ON - pause download/*arr/CPU-heavy containers.
+  Gaming Mode ON - pause download/*arr/CPU-heavy containers.
 .DESCRIPTION
   Stops qbittorrent, *arr, jellyseerr, flaresolverr, bazarr, music, compress,
   recyclarr, and homarr. Leaves jellyfin + pihole + unbound running for house use.
@@ -19,7 +19,7 @@ $ErrorActionPreference = 'Stop'
 $common = Join-Path $PSScriptRoot 'gaming-mode-common.ps1'
 . $common
 
-Write-Host '=== Homelab Gaming Mode ON ==='
+Write-Host '=== Gaming Mode ON ==='
 Set-MediaServerLocation
 
 if (-not (Wait-DockerEngine)) {

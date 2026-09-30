@@ -1,6 +1,6 @@
-# Gaming Mode (homelab on a gaming PC)
+# Gaming Mode
 
-Free CPU / RAM / disk / network while playing games, without stopping house streaming or DNS.
+Frees CPU, RAM, disk, and network while I game, without killing house streaming or DNS.
 
 Compose project: `home-media-server`  
 Profiles: `core`, `requests`, `dns`, `subs`, `music`, `compress`, `dashboard`, `sync`, `full`

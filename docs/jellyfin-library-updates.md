@@ -15,7 +15,7 @@ Path mounts themselves were already correct in this stack:
 - Sonarr `/tv` + `/tv2` ↔ Jellyfin `/media/tv` + `/media/tv2`
 - Radarr `/movies` + `/movies2` ↔ Jellyfin `/media/movies` + `/media/movies2`
 
-## Fix pattern
+## What fixed it
 
 1. Trigger a one-shot `POST /Library/Refresh` (full scan) after large backfills.
 2. Create a Jellyfin API key dedicated to *arr notifications (store only in the apps; never in git).

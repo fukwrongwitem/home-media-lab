@@ -1,50 +1,49 @@
 # Changelog
 
-## 2026-09-29 — First-run wire-up + migrate scripts
-- Published sanitized first-run wire-up guide (Jellyseerr, overflow roots, DNS/Gaming Mode cross-links)
-- Added portable `scripts/init-folders.*` and `scripts/pack-for-move.*` referenced by migrate docs
-- Fixes broken doc links left from the initial portfolio cut
+## 2026-09-29 — Wire-up guide + migrate scripts
+- First-run wire-up order for Jellyseerr, overflow roots, DNS, and Gaming Mode
+- Added `scripts/init-folders.*` and `scripts/pack-for-move.*` used by the migrate docs
+- Fixed broken links left from the first repo cut
 
-## 2026-09 — Jellyfin plugins + Seerr-in-UI
-- Installed Jellyfin Enhanced (Seerr search/request via compose DNS to Jellyseerr), Intro Skipper, Media Bar, and File Transformation
-- Documented community plugin repositories and post-restart client refresh steps
-- See [docs/jellyfin-plugins.md](docs/jellyfin-plugins.md)
+## 2026-09 — Jellyfin plugins + Seerr in the UI
+- Installed Jellyfin Enhanced (Seerr search/request to Jellyseerr over compose DNS), Intro Skipper, Media Bar, File Transformation
+- Notes for community plugin repos and client refresh after restart
+- [docs/jellyfin-plugins.md](docs/jellyfin-plugins.md)
 
-## 2026-09 — Gaming Mode for dual-use PC
-- Added PowerShell Gaming Mode on/off scripts that stop download/*arr/CPU-heavy containers while leaving Jellyfin + Pi-hole/Unbound running
-- Desktop shortcut helper; state file records what was paused for clean resume
-- See [docs/gaming-mode.md](docs/gaming-mode.md) and `bin/`
+## 2026-09 — Gaming Mode
+- PowerShell on/off scripts stop download/*arr/CPU-heavy containers; Jellyfin + Pi-hole/Unbound stay up
+- Desktop shortcuts; state file so resume only starts what was paused
+- [docs/gaming-mode.md](docs/gaming-mode.md), `bin/`
 
 ## 2026-09 — Downloads on secondary volume
-- Moved `DOWNLOADS_ROOT` to a second drive; kept container paths (`/downloads`) so Sonarr/Radarr maps stay stable
-- Documented primary vs overflow library + download scratch layout
-- See [docs/downloads-layout.md](docs/downloads-layout.md)
+- Pointed `DOWNLOADS_ROOT` at a second drive; left container paths as `/downloads` so Sonarr/Radarr maps stay the same
+- [docs/downloads-layout.md](docs/downloads-layout.md)
 
-## 2026-09 — Jellyfin library freshness on Docker Desktop
-- Documented unreliable realtime file watchers on Windows bind mounts
-- Wired Sonarr/Radarr → Jellyfin MediaBrowser Connect (path maps over compose DNS) plus hourly library scan safety net
-- See [docs/jellyfin-library-updates.md](docs/jellyfin-library-updates.md)
+## 2026-09 — Jellyfin library freshness (Docker Desktop)
+- Realtime file watchers on Windows bind mounts kept missing imports
+- Wired Sonarr/Radarr → Jellyfin MediaBrowser Connect (path maps over compose DNS) and shortened Scan Media Library to hourly
+- [docs/jellyfin-library-updates.md](docs/jellyfin-library-updates.md)
 
 ## 2026-09 — Local access without custom router DNS
-- Documented Homarr / stack URLs via `127.0.0.1` (and LAN IP for other devices)
-- Noted Docker Desktop hairpin + Homarr tile ping URLs on the compose network
-- Confirmed dashboards work with ISP DNS; Pi-hole/dnsproxy optional for UI access
+- Homarr and the rest of the stack via `127.0.0.1` on this PC (LAN IP from other devices)
+- Docker Desktop hairpin quirk; Homarr tile pings use Docker service names
+- Dashboards work with ISP DNS; Pi-hole/dnsproxy not required just to open Homarr
 
-## 2026-09 — Windows Docker DNS on :53 via host dnsproxy
-- Pi-hole DNS published only as `127.0.0.1:5053` (avoids Docker Desktop / ICS conflict on LAN UDP/TCP 53)
-- Documented AdGuard dnsproxy on the host (`:53` → `127.0.0.1:5053`), WSL mirrored networking, Private Ethernet + firewall notes
-- Unbound remains Pi-hole’s recursive upstream on the compose network
+## 2026-09 — Windows Docker DNS via host dnsproxy
+- Pi-hole DNS bound to `127.0.0.1:5053` only (Docker Desktop / ICS conflict on LAN `:53`)
+- AdGuard dnsproxy on the host (`:53` → `127.0.0.1:5053`); WSL mirrored networking + Private Ethernet notes
+- Unbound still upstream of Pi-hole on the compose network
 
 ## 2026-09 — Recursive DNS with Unbound
-- Added Unbound (klutchell/unbound, NLnetLabs) on the `dns` profile beside Pi-hole
-- Pi-hole upstream set to `unbound` (private recursive resolver on the compose network; no host ports on Unbound)
-- Optional LAN setup: point router DHCP DNS at the host LAN IP only while the dns profile is running
+- Unbound (`klutchell/unbound`) on the `dns` profile next to Pi-hole
+- Pi-hole upstream set to `unbound` instead of a public resolver
+- Optional: point router DHCP DNS at this host’s LAN IP only while dns is running
 
 ## 2026-09 — Dual-drive library expansion
-- Added secondary movie/TV mounts for overflow storage on a second volume
-- Kept app config on the primary volume for portability
+- Secondary movie/TV mounts for overflow storage
+- App config stays on the primary volume
 
 ## 2026-09 — Portable media lab v1
-- Docker Compose stack with RAM-aware profiles for a gaming PC
-- Docs for first-run wiring, space-saving encodes, Tailscale remote access, and host migration
-- Optional profiles: requests dashboard, subtitles, music, DNS, overnight compression
+- Docker Compose stack with RAM-aware profiles on a gaming PC
+- Docs for first-run wiring, space-saving encodes, Tailscale, and host migration
+- Optional profiles: requests, subs, music, DNS, overnight compression

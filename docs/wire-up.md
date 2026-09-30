@@ -2,7 +2,7 @@
 
 Configure apps in this order. Use container names as hostnames on the Docker network `media` (e.g. `http://qbittorrent:8080` from Sonarr). From your browser on the Docker host, use `http://localhost:<port>`.
 
-**No piracy guidance here** — only paths, download client, and service links.
+This guide covers paths, download client links, and service wiring only.
 
 ## 0. Prerequisites
 

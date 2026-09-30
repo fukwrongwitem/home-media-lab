@@ -4,7 +4,7 @@ D: (and most laptop/gaming SSDs) fill up fast with remuxes and uncompressed Blu-
 
 Jellyfin on a LAN plays HEVC (x265) and modern codecs fine for typical TVs/phones/browsers. Prefer grabbing already-compressed releases; use optional Unmanic only to shrink what you already have.
 
-**No indexer shopping lists here** — only quality/size strategy and tool settings.
+Quality and size strategy only — no indexer lists.
 
 ## Prefer / avoid
 

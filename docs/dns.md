@@ -12,7 +12,7 @@ Optional profile: `dns` (also included in `full`).
 
 On Windows with Docker Desktop, publishing container ports `53/tcp` and `53/udp` often fails or fights with Internet Connection Sharing (ICS), Hyper-V, or other host DNS listeners. Binding Pi-hole to loopback `:5053` and putting a thin host forwarder on `:53` avoids that conflict while still serving the LAN.
 
-Typical companion host setup (documented here for portfolio context; exact install paths vary):
+Host-side setup I used (paths may differ on your machine):
 
 1. Enable WSL2 mirrored networking in `.wslconfig` when needed for consistent host/LAN behavior with Docker Desktop.
 2. Set the Ethernet profile to **Private** and allow DNS (UDP/TCP 53) in the Windows firewall for the private profile.

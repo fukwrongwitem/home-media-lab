@@ -1,8 +1,8 @@
 # Jellyfin plugins
 
-Documented against Jellyfin Server **10.10+/12.x** Docker image (`jellyfin/jellyfin:latest`) on a Windows + Docker Desktop host.
+Notes from Jellyfin Server **10.10+/12.x** (`jellyfin/jellyfin:latest`) on Windows + Docker Desktop.
 
-## Installed plugins (lab)
+## Plugins in use
 
 | Plugin | Role |
 |--------|------|
@@ -34,7 +34,7 @@ Sources:
 
 **Jellyfin Enhanced** exposes Seerr search/request inside Jellyfin (no separate Request plugin).
 
-Employer-safe wiring pattern:
+Wiring (keep the API key out of git):
 
 | Setting | Approach |
 |---------|----------|
@@ -60,7 +60,7 @@ docker restart jellyfin
 # or: docker compose --profile core restart jellyfin
 ```
 
-## Operator checklist after install
+## After install
 
 1. Hard-refresh every Jellyfin **web** client.
 2. Confirm Enhanced Seerr status (linked user, search returns results for titles not in the library).

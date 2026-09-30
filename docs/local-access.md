@@ -23,7 +23,7 @@ Bookmark **http://127.0.0.1:7575** as the home dashboard.
 
 Use `http://192.168.4.42:<port>` (same ports). From *this* Windows host, `192.168.4.42` often hangs (Docker Desktop hairpin) — prefer `127.0.0.1` on the media PC itself.
 
-## DNS note (informational)
+## DNS note
 
 - System DNS: ISP (router default) — expected.
 - dnsproxy + Pi-hole still run locally (127.0.0.1:5053 / web :8053) but are **not required** for Homarr.

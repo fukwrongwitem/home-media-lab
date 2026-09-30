@@ -1,63 +1,58 @@
-# Home Media Lab (Portfolio)
+# Home Media Lab
 
-Self-hosted media stack on a dual-use Windows 11 gaming PC, designed to stay **portable** for a later move to a dedicated box.
+Self-hosted media stack on my Windows 11 gaming PC. Same box games and serves media, so everything is profile-based and easy to pause. Layout is meant to move to a dedicated Linux host later without redesigning the stack.
 
-This write-up focuses on systems work employers care about: Docker Compose, service profiles, storage layout, remote access, and documentation. Application credentials and third-party indexer details are intentionally omitted.
+Credentials, API keys, and indexer details are kept out of this repo.
 
-## Highlights
-
-- **Docker Compose** multi-service stack with **profiles** (`core`, `requests`, `subs`, `music`, `dns`, `compress`, `dashboard`, `sync`, `full`) so the same machine can game and serve media without starting everything at once
-- **Gaming Mode**: PowerShell helpers stop download/*arr/CPU-heavy containers while leaving Jellyfin + Pi-hole/Unbound up ([docs/gaming-mode.md](docs/gaming-mode.md))
-- **Portable layout**: one folder (`compose`, `config`, `media`, `downloads`) with relative paths and a migrate guide
-- **Storage split**: app config on a fast volume; library overflow + download scratch on a second drive ([docs/downloads-layout.md](docs/downloads-layout.md))
-- **Jellyfin ops**: *arr → Jellyfin Connect for timely library updates on Docker Desktop bind mounts; plugins (Enhanced/Seerr, Intro Skipper, Media Bar)
-- **Remote access plan**: Tailscale + Jellyfin `PublishedServerUrl` (no inbound port forwarding)
-- **Ops extras**: Homarr dashboard, Recyclarr quality-profile sync, optional overnight library compression
-
-## Stack (high level)
+## What’s running
 
 | Area | Services |
 |------|----------|
 | Playback / requests | Jellyfin (+ plugins), Jellyseerr |
 | Automation | Sonarr, Radarr, Bazarr, Prowlarr, FlareSolverr |
-| Downloads | qBittorrent (containerized) |
-| DNS (optional profile) | Pi-hole + Unbound; Windows host dnsproxy for LAN :53 |
-| Music (optional profile) | Lidarr (+ optional Soulseek client) |
-| Compress (optional profile) | Unmanic |
+| Downloads | qBittorrent |
+| DNS (optional) | Pi-hole + Unbound; on Windows, host dnsproxy owns LAN `:53` |
+| Music (optional) | Lidarr (+ optional Soulseek client) |
+| Compress (optional) | Unmanic (overnight / idle only) |
 | Dashboard / QoL | Homarr, Recyclarr |
 
-## Architecture notes
+Compose profiles: `core`, `requests`, `subs`, `music`, `dns`, `compress`, `dashboard`, `sync`, `full`.
+
+## Layout
 
 ```text
 Gaming PC (Windows 11 + Docker Desktop / WSL2)
 ├── Primary volume   media-server/   # compose, config, primary media
 ├── Secondary volume media-server/   # overflow library + downloads
-└── Tailscale on host for remote Jellyfin clients
+└── Tailscale on the host for remote Jellyfin
 ```
 
-- **RAM-aware**: prefer `--profile core` while gaming (~16 GB host); use Gaming Mode scripts to pause the rest
-- **AMD GPU**: containerized encode is software-first; heavy re-encode kept on an idle/overnight profile
-- **Migration**: pack/scripts + docs for moving the whole tree to a dedicated Linux host later
+- One stack folder: compose, config, media, downloads (relative paths where possible)
+- App config stays on the fast drive; library overflow and download scratch sit on a second volume — [downloads-layout.md](docs/downloads-layout.md)
+- ~16 GB RAM: keep `--profile core` while gaming, or use Gaming Mode scripts to stop the heavy containers and leave Jellyfin + Pi-hole/Unbound up — [gaming-mode.md](docs/gaming-mode.md)
+- AMD GPU: software encode in Docker for now; heavy re-encode only when idle
+- Remote: Tailscale + Jellyfin `PublishedServerUrl` (no inbound port forward) — [tailscale.md](docs/tailscale.md)
 
-## What I did
+## What I built / fixed
 
-1. Designed a profile-based Compose layout for a dual-use PC
-2. Documented first-run wiring, space-saving encode preferences, and Tailscale remote access
-3. Expanded library + downloads onto a second volume without moving app config
-4. Built Gaming Mode on/off scripts so streaming/DNS survive game sessions
-5. Fixed Jellyfin library freshness on Docker Desktop (Connect + scan safety net) and added UI plugins (Seerr-in-Jellyfin, Intro Skipper, Media Bar)
-6. Coordinated ongoing hardening with a dedicated Homelab assistant workflow
+1. Profile-based Docker Compose so the PC can game and still stream
+2. First-run wiring notes, space-saving quality profiles, Tailscale remote access
+3. Split library + downloads across two volumes without moving app config
+4. Gaming Mode on/off PowerShell scripts (desktop shortcuts) so streaming/DNS survive a game session
+5. Jellyfin library refresh on Docker Desktop bind mounts (Sonarr/Radarr Connect + hourly scan) after realtime watchers kept missing imports
+6. Worked around Windows Docker Desktop fighting over UDP/TCP 53 (Pi-hole on loopback + host dnsproxy)
+7. Jellyfin plugins: Enhanced (Seerr in the UI), Intro Skipper, Media Bar
 
 ## Repo contents
 
-- Sanitized `docker-compose` / `.env.example` (no secrets)
-- `bin/` Gaming Mode PowerShell helpers (relative stack root)
-- `scripts/` folder layout + pack-for-move helpers for host migration
-- Architecture and ops docs (`docs/`), including first-run [wire-up](docs/wire-up.md) and local URLs without custom router DNS
-- Changelog of milestones suitable for interviews
+- Sanitized `docker-compose.example.yml` and `.env.example` (no secrets)
+- `bin/` — Gaming Mode helpers
+- `scripts/` — folder init + pack-for-move for migration
+- `docs/` — ops notes (start with [wire-up.md](docs/wire-up.md) and [local-access.md](docs/local-access.md))
+- [CHANGELOG.md](CHANGELOG.md)
 
-> **Privacy:** Do not commit real `.env`, API keys, or download-client credentials.
+**Privacy:** don’t commit a real `.env`, API keys, or download-client passwords.
 
 ## Status
 
-Living project — updated as the lab evolves.
+Active lab. Docs get updated when the stack changes.
