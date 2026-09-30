@@ -1,23 +1,21 @@
 # Jellyfin / Jellyseerr access model
 
-Dual-use home stack: one admin for the host, plus household accounts with different request powers.
+Dual-use home stack: host admin account for the owner, plus a household requester with limited powers.
 
 ## Accounts (pattern)
 
 | Role | Jellyfin | Jellyseerr | Intent |
 |------|----------|------------|--------|
-| Stack admin | existing admin user | admin | Leave as host/owner admin |
-| Approver | non-admin media user | admin / manage requests | Approve and curate household requests |
+| Owner / approver | admin media user | admin / manage requests | Stack admin + approve household requests |
 | Requester | non-admin media user | request only | Request TV/movies; no admin |
 
-In this lab: stack admin stays `draco`; approver is `rado`; requester is `sebastian`.
+In this lab the owner account is **`draco`** (main username). A second Jellyfin user named `rado` was created earlier for the same person and is not treated as a separate household member — prefer `draco`. The requester account is **`sebastian`**.
 
 ## Policy
 
 - Requesters open movies/TV in Jellyseerr only.
-- Approver reviews and approves (Jellyseerr admin).
+- Owner (`draco`) reviews and approves (Jellyseerr admin) and remains Jellyfin admin.
 - New Jellyseerr users default to **request-only** permissions.
-- Stack admin on Jellyfin is left unchanged for compose/ops work.
 
 ## URLs (lab)
 
@@ -33,5 +31,5 @@ Not stored in this repo. Users change passwords in Jellyfin (Profile → Passwor
 
 ## Ops notes
 
-- After creating users, confirm Jellyseerr imported them from Jellyfin and that requester vs approver permissions match the table above.
-- Keep credentials out of Obsidian notes that sync toward public docs.
+- After creating users, confirm Jellyseerr imported them from Jellyfin and that requester vs owner permissions match the table above.
+- Keep credentials out of notes that sync toward public docs.
