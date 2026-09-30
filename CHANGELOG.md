@@ -2,7 +2,7 @@
 
 ## 2026-09-29 — Household Jellyfin / Jellyseerr roles
 - Documented owner (`draco`) vs request-only (`sebastian`) access (no passwords in repo)
-- Clarified `rado` was a duplicate owner account, not a second person
+- Removed duplicate `rado` account from the live stack; docs match `draco` + `sebastian` only
 - See [docs/jellyfin-users.md](docs/jellyfin-users.md)
 
 ## 2026-09-29 — Wire-up guide + migrate scripts

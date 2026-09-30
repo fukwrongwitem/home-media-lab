@@ -1,6 +1,6 @@
 # Jellyfin / Jellyseerr access model
 
-Dual-use home stack: host admin account for the owner, plus a household requester with limited powers.
+Dual-use home stack: owner admin account plus a household requester with limited powers.
 
 ## Accounts (pattern)
 
@@ -9,7 +9,7 @@ Dual-use home stack: host admin account for the owner, plus a household requeste
 | Owner / approver | admin media user | admin / manage requests | Stack admin + approve household requests |
 | Requester | non-admin media user | request only | Request TV/movies; no admin |
 
-In this lab the owner account is **`draco`** (main username). A second Jellyfin user named `rado` was created earlier for the same person and is not treated as a separate household member — prefer `draco`. The requester account is **`sebastian`**.
+In this lab the owner account is **`draco`** (main username for Rado). A temporary second user named `rado` was created by mistake for the same person and has been **removed** from Jellyfin and Jellyseerr. The requester account is **`sebastian`**.
 
 ## Policy
 
