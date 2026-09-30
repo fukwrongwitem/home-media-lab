@@ -10,21 +10,22 @@ Credentials, API keys, and indexer details are kept out of this repo.
 |------|----------|
 | Playback / requests | Jellyfin (+ plugins), Jellyseerr |
 | Automation | Sonarr, Radarr, Bazarr, Prowlarr, FlareSolverr |
-| Downloads | qBittorrent |
+| Downloads | qBittorrent (Proton/gluetun planned — qBit only) |
 | DNS (optional) | Pi-hole + Unbound; on Windows, host dnsproxy owns LAN `:53` |
 | Music (optional) | Lidarr (+ optional Soulseek client) |
 | Compress (optional) | Unmanic (overnight / idle only) |
 | Dashboard / QoL | Homarr, Recyclarr |
+| Notes | Obsidian vault colocated with the stack; Local REST API via Tailscale Serve |
 
-Compose profiles: `core`, `requests`, `subs`, `music`, `dns`, `compress`, `dashboard`, `sync`, `full`.
+Compose profiles: `core`, `requests`, `subs`, `music`, `dns`, `compress`, `dashboard`, `sync`, `full` (plus a planned `vpn` profile for gluetun).
 
 ## Layout
 
 ```text
 Gaming PC (Windows 11 + Docker Desktop / WSL2)
-├── Primary volume   media-server/   # compose, config, primary media
+├── Primary volume   media-server/   # compose, config, primary media, Obsidian vault
 ├── Secondary volume media-server/   # overflow library + downloads
-└── Tailscale on the host for remote Jellyfin
+└── Tailscale on the host for remote Jellyfin (+ Serve for Obsidian API)
 ```
 
 - One stack folder: compose, config, media, downloads (relative paths where possible)
@@ -32,6 +33,7 @@ Gaming PC (Windows 11 + Docker Desktop / WSL2)
 - ~16 GB RAM: keep `--profile core` while gaming, or use Gaming Mode scripts to stop the heavy containers and leave Jellyfin + Pi-hole/Unbound up — [gaming-mode.md](docs/gaming-mode.md)
 - AMD GPU: software encode in Docker for now; heavy re-encode only when idle
 - Remote: Tailscale + Jellyfin `PublishedServerUrl` (no inbound port forward) — [tailscale.md](docs/tailscale.md)
+- Lab notes in Obsidian next to the stack — [obsidian-vault.md](docs/obsidian-vault.md)
 
 ## What I built / fixed
 
@@ -42,6 +44,9 @@ Gaming PC (Windows 11 + Docker Desktop / WSL2)
 5. Jellyfin library refresh on Docker Desktop bind mounts (Sonarr/Radarr Connect + hourly scan) after realtime watchers kept missing imports
 6. Worked around Windows Docker Desktop fighting over UDP/TCP 53 (Pi-hole on loopback + host dnsproxy)
 7. Jellyfin plugins: Enhanced (Seerr in the UI), Intro Skipper, Media Bar
+8. Obsidian vault for lean ops notes; Local REST API reached over Tailscale Serve (tailnet only)
+9. Planned Proton + gluetun kill-switch path for qBittorrent only (credentials not applied yet)
+10. Sonarr `Anime-Loose` quality profile + lower size floors for short-episode anime packs
 
 ## Repo contents
 
@@ -51,7 +56,7 @@ Gaming PC (Windows 11 + Docker Desktop / WSL2)
 - `docs/` — ops notes (start with [wire-up.md](docs/wire-up.md), [local-access.md](docs/local-access.md), [jellyfin-users.md](docs/jellyfin-users.md))
 - [CHANGELOG.md](CHANGELOG.md)
 
-**Privacy:** don’t commit a real `.env`, API keys, or download-client passwords.
+**Privacy:** don’t commit a real `.env`, API keys, VPN private keys, or download-client passwords.
 
 ## Status
 

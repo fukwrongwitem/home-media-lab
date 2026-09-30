@@ -1,5 +1,12 @@
 # Changelog
 
+## 2026-09-30 — Obsidian vault, Tailscale Serve, Proton plan, anime quality
+- Colocated Obsidian vault under the media-server tree for lean ops notes
+- Documented Local REST API over Tailscale Serve (tailnet only; Funnel off)
+- Wrote the Proton / gluetun plan for qBittorrent-only VPN (live compose unchanged; no secrets)
+- Documented Sonarr `Anime-Loose` profile + lower quality-definition mins for short-episode anime
+- See [docs/obsidian-vault.md](docs/obsidian-vault.md), [docs/obsidian-rest-api.md](docs/obsidian-rest-api.md), [docs/proton-vpn-qbit.md](docs/proton-vpn-qbit.md), [docs/sonarr-anime-quality.md](docs/sonarr-anime-quality.md)
+
 ## 2026-09-29 — Household Jellyfin / Jellyseerr roles
 - Documented owner (`draco`) vs request-only (`sebastian`) access (no passwords in repo)
 - Removed duplicate `rado` account from the live stack; docs match `draco` + `sebastian` only

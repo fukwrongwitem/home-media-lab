@@ -53,7 +53,7 @@ Windows Firewall usually allows Tailscale. If the UI loads on the PC but not rem
 
 - **Do not** port-forward `8096` on your home router for “easy remote.” Tailscale replaces that.
 - **Do not** enable Tailscale **Funnel** unless you intentionally want a public URL (that exposes Jellyfin to the internet). Prefer private tailnet only.
-- Optional **Tailscale Serve** can put HTTPS on the tailnet hostname; only set that up if you know you want it. Host Tailscale + `:8096` is enough for most people.
+- Optional **Tailscale Serve** can put HTTPS on the tailnet hostname. I use it for Obsidian’s Local REST API (tailnet only) — [obsidian-rest-api.md](obsidian-rest-api.md). Host Tailscale + `:8096` is still enough for Jellyfin alone.
 
 ## Moving to a dedicated box later
 
