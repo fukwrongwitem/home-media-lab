@@ -1,0 +1,175 @@
+# Portable home media server stack (Docker Compose).
+# Runs on my gaming PC today; the whole folder can be copied to a dedicated box later.
+# Host today: Windows 11 gaming PC - ~16 GB RAM, AMD Radeon GPU.
+# Paths (CONFIG_ROOT / MEDIA_ROOT / WORK_ROOT) default to ./ relative to this file.
+#
+# Library content is my own disc rips (docs/disc-ripping.md) and home videos.
+#
+# Profiles (RAM-friendly on a gaming PC):
+#   core      - jellyfin
+#   dns       - pihole + unbound
+#   dashboard - homarr
+#   compress  - unmanic (optional HEVC re-encode to shrink the library; CPU-heavy)
+#   full      - everything above
+#
+# Examples:
+#   docker compose --profile core up -d
+#   docker compose --profile core --profile dns --profile dashboard up -d
+#   docker compose --profile core --profile compress up -d   # only when NOT gaming
+# While gaming, use Gaming Mode (keeps Jellyfin + DNS up):
+#   see docs/gaming-mode.md and bin/gaming-mode-on.ps1
+# Space strategy: docs/space-saving.md
+#
+# Memory limit lines are COMMENTED - uncomment only if you need hard caps.
+# Do not set aggressive limits that starve games on 16 GB.
+
+name: home-media-server
+
+networks:
+  media:
+    name: media
+    driver: bridge
+
+services:
+  # --- CORE ----------------------------------------------------------------
+  jellyfin:
+    image: jellyfin/jellyfin:latest
+    container_name: jellyfin
+    profiles: ["core", "full"]
+    environment:
+      - TZ=${TZ:-America/Los_Angeles}
+      # Tailscale remote: set in .env to http://<tailscale-hostname-or-ip>:8096 - see docs/tailscale.md
+      - JELLYFIN_PublishedServerUrl=${JELLYFIN_PublishedServerUrl:-}
+    volumes:
+      - ${CONFIG_ROOT}/jellyfin:/config
+      - ${MEDIA_ROOT}/movies:/media/movies:ro
+      - ${MEDIA_ROOT}/tv:/media/tv:ro
+      - ${MEDIA_ROOT}/music:/media/music:ro
+      - ${MEDIA_ROOT}/home-videos:/media/home-videos:ro
+      - ./media/movies-overflow:/media/movies2:ro
+      - ./media/tv-overflow:/media/tv2:ro
+      # Optional transcode cache on fast disk:
+      # - ${CONFIG_ROOT}/jellyfin-cache:/cache
+    ports:
+      - "${JELLYFIN_PORT:-8096}:8096"
+      - "${JELLYFIN_HTTPS_PORT:-8920}:8920"
+    # AMD GPU on Docker Desktop Windows: HW transcode via Docker is limited.
+    # Default is software encode (CPU). For AMD AMF HW encode, prefer a native
+    # Windows Jellyfin install, or experiment with WSL2/DX devices later -
+    # do NOT expect NVIDIA-style --gpus / device blocks to work on this host.
+    # devices: []
+    networks:
+      - media
+    restart: unless-stopped
+    # deploy:
+    #   resources:
+    #     limits:
+    #       memory: 2G
+
+  # --- DNS / ADS -----------------------------------------------------------
+  # Pi-hole on Docker Desktop (Windows) caveats:
+  # - Publishing 53/tcp+udp often conflicts with other DNS listeners on the Windows host.
+  # - Workaround: bind Pi-hole DNS to loopback on a non-default local port
+  #   (PIHOLE_DNS_BIND / PIHOLE_DNS_PORT) and run a small DNS forwarder on the
+  #   host that owns :53 (see docs/dns.md). On Linux, publish 53 directly.
+  # - Host networking is NOT like Linux; do not use network_mode: host.
+  # - Point router DHCP DNS at this server only while the forwarder + dns profile run.
+  # - Gaming VPNs (and some anti-cheat) may override DNS - expect conflicts.
+
+  # Unbound (NLnetLabs recursive resolver via klutchell/unbound image).
+  # No host ports - only Pi-hole talks to it, over the compose network.
+  # Custom conf snippets: ${CONFIG_ROOT}/unbound -> /etc/unbound/custom.conf.d
+  unbound:
+    image: klutchell/unbound
+    container_name: unbound
+    profiles: ["dns", "full"]
+    volumes:
+      - ${CONFIG_ROOT}/unbound:/etc/unbound/custom.conf.d
+    networks:
+      - media
+    restart: unless-stopped
+    healthcheck:
+      # Use the drill wrapper binary to reduce the exit codes to 0 or 1 for healthchecks
+      test: ["CMD", "drill-hc", "@127.0.0.1", "dnssec.works"]
+      interval: 30s
+      timeout: 30s
+      retries: 3
+      start_period: 30s
+
+  pihole:
+    image: pihole/pihole:latest
+    container_name: pihole
+    profiles: ["dns", "full"]
+    environment:
+      - TZ=${TZ:-America/Los_Angeles}
+      - FTLCONF_webserver_api_password=CHANGE_ME
+      - FTLCONF_dns_listeningMode=ALL
+      - FTLCONF_dns_upstreams=unbound
+    volumes:
+      - ${CONFIG_ROOT}/pihole/etc-pihole:/etc/pihole
+      - ${CONFIG_ROOT}/pihole/etc-dnsmasq.d:/etc/dnsmasq.d
+    ports:
+      # Windows Docker Desktop: bind DNS to loopback + a free local port; a host forwarder owns :53
+      - "${PIHOLE_DNS_BIND:-127.0.0.1}:${PIHOLE_DNS_PORT:-53}:53/tcp"
+      - "${PIHOLE_DNS_BIND:-127.0.0.1}:${PIHOLE_DNS_PORT:-53}:53/udp"
+      - "${PIHOLE_WEB_PORT:?set PIHOLE_WEB_PORT in .env}:80"
+    networks:
+      - media
+    depends_on:
+      - unbound
+    restart: unless-stopped
+    # deploy:
+    #   resources:
+    #     limits:
+    #       memory: 512M
+    cap_add:
+      - NET_ADMIN
+
+  # --- COMPRESS (SSD space) ------------------------------------------------
+  # Optional re-encode of existing library files to HEVC. For new disc rips I
+  # encode with HandBrake first (docs/disc-ripping.md, docs/space-saving.md).
+  # Run ONLY when not gaming - software encode hammers CPU/RAM on ~16 GB.
+  # AMD HW encode via Docker Desktop on Windows is limited; expect CPU encode here.
+  # On a future Linux box you can try /dev/dri.
+  # UI: http://localhost:${UNMANIC_PORT}
+  unmanic:
+    image: josh5/unmanic:latest
+    container_name: unmanic
+    profiles: ["compress", "full"]
+    environment:
+      - PUID=${PUID:-1000}
+      - PGID=${PGID:-1000}
+      - TZ=${TZ:-America/Los_Angeles}
+    volumes:
+      - ${CONFIG_ROOT}/unmanic:/config
+      - ${MEDIA_ROOT}:/library
+      - ${WORK_ROOT}/unmanic-cache:/tmp/unmanic
+    ports:
+      - "${UNMANIC_PORT:-8888}:8888"
+    networks:
+      - media
+    restart: unless-stopped
+    # deploy:
+    #   resources:
+    #     limits:
+    #       memory: 2G
+
+  # --- DASHBOARD -----------------------------------------------------------
+  # Homarr: self-hosted dashboard for the stack. UI: http://localhost:${HOMARR_PORT}
+  # Generate key once: openssl rand -hex 32 (stored in .env HOMARR_SECRET_ENCRYPTION_KEY)
+  homarr:
+    image: ghcr.io/homarr-labs/homarr:latest
+    container_name: homarr
+    profiles: ["dashboard", "full"]
+    environment:
+      - TZ=${TZ:-America/Los_Angeles}
+      - SECRET_ENCRYPTION_KEY=${HOMARR_SECRET_ENCRYPTION_KEY:?set HOMARR_SECRET_ENCRYPTION_KEY in .env}
+    volumes:
+      - ${CONFIG_ROOT}/homarr:/appdata
+      # Optional Docker integration (Docker Desktop on Windows uses named pipe; may be limited)
+      # - //var/run/docker.sock:/var/run/docker.sock
+    ports:
+      - "${HOMARR_PORT:-7575}:7575"
+    networks:
+      - media
+    restart: unless-stopped

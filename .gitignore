@@ -1,0 +1,10 @@
+.env
+**/config/**
+!**/config/.gitkeep
+media/
+work/
+*.bak
+*.bak-*
+
+# Runtime state from Gaming Mode scripts
+bin/.gaming-mode-state.json
