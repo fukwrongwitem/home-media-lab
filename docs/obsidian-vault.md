@@ -1,11 +1,11 @@
 # Homelab notes in Obsidian
 
-I keep ops notes in an Obsidian vault inside the stack folder, so a backup of the stack includes the runbooks.
+I keep ops notes in an Obsidian vault. It started inside the stack folder so a backup of the stack would include the runbooks. After the rebuild I moved it into my main notes folder instead. Either way works as long as no secrets end up in the markdown.
 
 ## Layout
 
 ```text
-obsidian-vault/
+<vault>/
 ├── 00-Home.md
 ├── Homelab/          # Docker, Hardware, Backups, Troubleshooting, Media-Stack, Networking, Gaming
 ├── Networking/       # DNS, remote access, LAN
@@ -30,4 +30,4 @@ Category folders hold topic notes; I split further inside a category when one no
 | Disc ripping workflow | [disc-ripping.md](disc-ripping.md) |
 | Remote access | [tailscale.md](tailscale.md) |
 | Gaming Mode | [gaming-mode.md](gaming-mode.md) |
-| Public portfolio mirror | this repo — sanitized copies only |
+| Public portfolio mirror | this repo - sanitized copies only |

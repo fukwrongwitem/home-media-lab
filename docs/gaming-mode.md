@@ -11,8 +11,10 @@ Scripts live under `bin/` next to `docker-compose.yml` (relative stack root).
 
 | Service | Why |
 |---------|-----|
-| **jellyfin** | House media playback |
+| **Jellyfin (Windows service)** | House media playback. It is not a container on this PC ([jellyfin-native-windows.md](jellyfin-native-windows.md)) |
 | **pihole** + **unbound** | LAN / local DNS (ads + recursive) |
+
+If I ran the compose `jellyfin` service instead, it would go on the keep-running list too.
 
 ## What gets stopped
 
@@ -29,7 +31,7 @@ One thing the scripts can't pause: a HandBrake encode or a disc rip running on t
 
 | Shortcut | Script | Action |
 |----------|--------|--------|
-| Homelab Gaming Mode | `bin/gaming-mode-on.ps1` | Stop heavy list; leave Jellyfin + DNS |
+| Homelab Gaming Mode | `bin/gaming-mode-on.ps1` | Stop the heavy list; leave DNS and Jellyfin up |
 | Homelab Resume | `bin/gaming-mode-off.ps1` | Start what Gaming Mode stopped |
 
 Both wait for **Docker Desktop** / the engine (`docker info`) before running compose. Recreate shortcuts anytime:
@@ -72,10 +74,11 @@ docker compose start unmanic homarr
 If a container was **removed** (not just stopped), recreate with profiles, e.g.:
 
 ```powershell
-docker compose --profile core --profile dns --profile dashboard up -d
+docker compose --profile dns --profile dashboard up -d
 ```
 
 ## Notes
 
-- Prefer this over `docker compose --profile full stop`, which would also stop Jellyfin and Pi-hole.
-- Unmanic is especially bad while gaming on ~16 GB RAM — keep it in the stop list.
+- Prefer this over `docker compose --profile full stop`, which would also stop Pi-hole.
+- Unmanic is especially bad while gaming on ~16 GB RAM - keep it in the stop list.
+- Jellyfin does not show up in `docker compose ps` anymore. If playback is down, I check Services for `JellyfinServer`.

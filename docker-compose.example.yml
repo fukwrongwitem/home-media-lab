@@ -32,6 +32,9 @@ networks:
 
 services:
   # --- CORE ----------------------------------------------------------------
+  # I run Jellyfin as a Windows service on my PC now (docs/jellyfin-native-windows.md),
+  # so I don't start this one there. It is here for a future Linux move.
+  # Never run both on one machine, they fight over the same port.
   jellyfin:
     image: jellyfin/jellyfin:latest
     container_name: jellyfin

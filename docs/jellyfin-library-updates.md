@@ -31,3 +31,7 @@ Invoke-RestMethod -Method Post -Uri "http://localhost:<JELLYFIN_PORT>/Library/Re
 
 - Copy finished files into the library in one move (encode in `work/encodes`, then move the finished folder). A half-copied file picked up by a scan can get matched with bad runtime/metadata; "Refresh metadata" on the item fixes it.
 - Docker bind mounts on Windows can't hardlink across drives, so moves between volumes are real copies and take a while for big files.
+
+## After moving to the Windows service
+
+Once Jellyfin moved to a Windows service ([jellyfin-native-windows.md](jellyfin-native-windows.md)), the libraries became plain NTFS folders. File watching works better there than on Docker Desktop bind mounts. I left the hourly scan on anyway, and I still use the refresh call after copying in a big batch of rips.
