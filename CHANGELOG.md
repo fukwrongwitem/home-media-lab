@@ -1,5 +1,12 @@
 # Changelog
 
+## 2026-10-16 - Nightly downtime
+- Added two scheduled tasks: 1:00 AM stops the Jellyfin service and the media containers, and 8:00 AM starts them again and logs UP/DOWN for each
+- DNS (Pi-hole + Unbound) and Docker Desktop are never touched
+- A missed 1 AM start is skipped. A missed 8 AM end runs as soon as I sign back in and waits up to 10 minutes for Docker Desktop
+- Tested with `-DryRun` first. The first real night (10/16) stopped and restarted everything cleanly
+- Scripts in `bin/`, notes in [docs/nightly-downtime.md](docs/nightly-downtime.md)
+
 ## 2026-10-11 - Rebuilt on a new PC, Jellyfin now a Windows service
 - Rebuilt the media PC on new hardware and put the stack folder back on the main data drive
 - Installed Jellyfin Server for Windows and set the service to start automatically. I stopped using the `jellyfin` container on this PC

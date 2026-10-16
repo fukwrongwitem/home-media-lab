@@ -82,3 +82,4 @@ docker compose --profile dns --profile dashboard up -d
 - Prefer this over `docker compose --profile full stop`, which would also stop Pi-hole.
 - Unmanic is especially bad while gaming on ~16 GB RAM - keep it in the stop list.
 - Jellyfin does not show up in `docker compose ps` anymore. If playback is down, I check Services for `JellyfinServer`.
+- Overnight shutdown is a separate pair of scheduled tasks ([nightly-downtime.md](nightly-downtime.md)). Gaming Mode OFF and downtime end start the same containers, so they don't step on each other.

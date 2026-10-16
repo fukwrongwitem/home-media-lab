@@ -32,6 +32,7 @@ Gaming PC (Windows 11 + Docker Desktop / WSL2)
 - One stack folder: compose, config, media, work scratch (relative paths where possible)
 - App config for the Docker services stays on the fast drive. Library overflow and rip staging sit on a second volume
 - RAM is tight while gaming. I keep the heavy profiles off, or run the Gaming Mode scripts to stop Homarr and Unmanic and leave DNS up ([gaming-mode.md](docs/gaming-mode.md)). Jellyfin keeps running either way
+- Overnight (1 AM to 8 AM) scheduled tasks stop Jellyfin and the media containers and bring them back in the morning. DNS stays up ([nightly-downtime.md](docs/nightly-downtime.md))
 - AMD GPU: Docker Desktop can't do hardware encode well here. I want to try AMF on the native install later ([jellyfin-native-windows.md](docs/jellyfin-native-windows.md))
 - Remote: Tailscale plus the Jellyfin published URL, no inbound port forward - [tailscale.md](docs/tailscale.md)
 - Getting discs into the library: [disc-ripping.md](docs/disc-ripping.md)
@@ -50,11 +51,12 @@ Gaming PC (Windows 11 + Docker Desktop / WSL2)
 9. Tracked down a "Jellyfin is down" report from a client app that was really DHCP lease drift on the media PC; added a DHCP reservation on the router so the address stops moving - [lan-ip-drift.md](docs/lan-ip-drift.md)
 10. Disc ripping workflow for my own DVDs, Blu-rays, and CDs: lossless rip, optional HEVC encode, Jellyfin naming - [disc-ripping.md](docs/disc-ripping.md)
 11. Rebuilt the lab on a new PC. Moved Jellyfin from Docker to a Windows service because it kept going down whenever I stopped Docker Desktop. Libraries stayed in the same folders ([jellyfin-native-windows.md](docs/jellyfin-native-windows.md))
+12. Nightly downtime with Windows Task Scheduler: stop Jellyfin and the media containers at 1 AM, start them at 8 AM, keep DNS up, and handle a PC that was off or booted late ([nightly-downtime.md](docs/nightly-downtime.md))
 
 ## Repo contents
 
 - Sanitized `docker-compose.example.yml` and `.env.example` (no secrets)
-- `bin/` - Gaming Mode helpers (Homarr and Unmanic)
+- `bin/` - Gaming Mode helpers (Homarr and Unmanic) and the nightly downtime scripts
 - `scripts/` - folder init and pack-for-move for migration, plus an example firewall script for the web ports
 - `docs/` - ops notes (start with [wire-up.md](docs/wire-up.md), [local-access.md](docs/local-access.md), [jellyfin-users.md](docs/jellyfin-users.md))
 - [CHANGELOG.md](CHANGELOG.md)

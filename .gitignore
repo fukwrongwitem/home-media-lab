@@ -8,3 +8,6 @@ work/
 
 # Runtime state from Gaming Mode scripts
 bin/.gaming-mode-state.json
+
+# Log from the nightly downtime scripts
+bin/downtime.log
