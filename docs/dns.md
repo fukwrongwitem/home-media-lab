@@ -19,6 +19,21 @@ On Windows with Docker Desktop, publishing a container on port 53 (TCP/UDP) ofte
 
 On a dedicated Linux host later, Pi-hole can usually publish 53 directly and the forwarder goes away.
 
+## Unbound cache tuning (2026-10-22)
+
+Browsing felt slow on first visits to sites, since a recursive resolver has to walk
+from the root servers on every cache miss. I added a small custom config
+([examples/unbound/faster-cache.conf](../examples/unbound/faster-cache.conf)) in
+`${CONFIG_ROOT}/unbound/`:
+
+- `prefetch` refreshes popular records before they expire
+- `serve-expired` answers from stale cache (up to a day) while a fresh lookup runs in the background
+- `cache-min-ttl: 300` stops re-resolving records with tiny TTLs every few seconds
+- bigger message/RRset caches (64 MB / 128 MB), still small for this PC
+
+Restart the `unbound` container to load it. To undo, delete the file and restart again.
+Trade-off: serving expired records means a changed record can be stale for a short while.
+
 ## Ops notes
 
 - On a dual-use gaming PC, stop the `dns` profile (and the forwarder) or put the router back on its default DNS before competitive play / VPN if you hit DNS conflicts. If the PC is off, anything pointed at it for DNS stops resolving, so keep a fallback in mind.

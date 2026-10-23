@@ -1,0 +1,46 @@
+# Jellystat - playback stats and watch history for Jellyfin.
+# Separate small stack (its own folder and compose project) so it can be
+# started/stopped without touching the main media stack.
+#
+#   cd jellystat && cp .env.example .env   # fill in the secrets
+#   docker compose up -d
+#
+# UI: http://localhost:${JELLYSTAT_PORT}
+# Jellyfin runs natively on the Windows host, so in the Jellystat setup screen
+# point it at http://host.docker.internal:8096 and paste a Jellyfin API key
+# (Dashboard > API Keys). Keep that key out of git.
+
+name: jellystat
+
+services:
+  jellystat-db:
+    image: postgres:16-alpine
+    container_name: jellystat-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: jellystat
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in .env}
+    volumes:
+      - ./postgres:/var/lib/postgresql/data
+    mem_limit: 256m
+
+  jellystat:
+    image: cyfershepard/jellystat:latest
+    container_name: jellystat
+    restart: unless-stopped
+    depends_on: [jellystat-db]
+    environment:
+      POSTGRES_USER: jellystat
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in .env}
+      POSTGRES_IP: jellystat-db
+      POSTGRES_PORT: 5432
+      JWT_SECRET: ${JWT_SECRET:?set JWT_SECRET in .env}
+      TZ: ${TZ:-America/Los_Angeles}
+    ports:
+      - "${JELLYSTAT_PORT:-3000}:3000"
+    volumes:
+      - ./backup:/app/backend/backup-data
+    extra_hosts:
+      # lets the container reach the native Jellyfin service on the host
+      - "host.docker.internal:host-gateway"
+    mem_limit: 512m

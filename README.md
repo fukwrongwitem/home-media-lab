@@ -12,6 +12,7 @@ Credentials and API keys are kept out of this repo.
 | DNS (optional) | Pi-hole + Unbound; on Windows, a small host forwarder owns port 53 |
 | Compress (optional) | Unmanic (overnight / idle only) |
 | Dashboard | Homarr |
+| Stats | Jellystat (Jellyfin watch history, own compose project in `jellystat/`) |
 | Remote access | Tailscale on the Windows host (no inbound port forwards) |
 | Notes | Obsidian vault for ops notes |
 
@@ -52,11 +53,15 @@ Gaming PC (Windows 11 + Docker Desktop / WSL2)
 10. Disc ripping workflow for my own DVDs, Blu-rays, and CDs: lossless rip, optional HEVC encode, Jellyfin naming - [disc-ripping.md](docs/disc-ripping.md)
 11. Rebuilt the lab on a new PC. Moved Jellyfin from Docker to a Windows service because it kept going down whenever I stopped Docker Desktop. Libraries stayed in the same folders ([jellyfin-native-windows.md](docs/jellyfin-native-windows.md))
 12. Nightly downtime with Windows Task Scheduler: stop Jellyfin and the media containers at 1 AM, start them at 8 AM, keep DNS up, and handle a PC that was off or booted late ([nightly-downtime.md](docs/nightly-downtime.md))
+13. Jellystat for Jellyfin playback history, kept as a separate memory-capped stack that talks to the native Jellyfin service ([jellystat.md](docs/jellystat.md))
+14. Tuned Unbound's cache (prefetch + serve-expired) so repeat lookups come back from cache instead of a full recursive walk ([dns.md](docs/dns.md))
 
 ## Repo contents
 
 - Sanitized `docker-compose.example.yml` and `.env.example` (no secrets)
 - `bin/` - Gaming Mode helpers (Homarr and Unmanic) and the nightly downtime scripts
+- `jellystat/` - example compose + `.env.example` for the stats stack
+- `examples/unbound/` - Unbound cache tuning snippet
 - `scripts/` - folder init and pack-for-move for migration, plus an example firewall script for the web ports
 - `docs/` - ops notes (start with [wire-up.md](docs/wire-up.md), [local-access.md](docs/local-access.md), [jellyfin-users.md](docs/jellyfin-users.md))
 - [CHANGELOG.md](CHANGELOG.md)

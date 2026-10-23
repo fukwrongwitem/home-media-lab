@@ -1,5 +1,11 @@
 # Changelog
 
+## 2026-10-22 - Jellystat and Unbound cache tuning
+- Added Jellystat (playback stats and watch history for Jellyfin) as its own small compose project with Postgres 16, memory-capped at 256 MB / 512 MB
+- It reaches the native Jellyfin service through `host.docker.internal`; secrets stay in a local `.env`
+- Example in `jellystat/`, notes in [docs/jellystat.md](docs/jellystat.md)
+- Tuned Unbound's cache (prefetch, serve-expired, minimum TTL, bigger caches) to speed up repeat lookups - [docs/dns.md](docs/dns.md#unbound-cache-tuning-2026-10-22), config in `examples/unbound/`
+
 ## 2026-10-16 - Nightly downtime
 - Added two scheduled tasks: 1:00 AM stops the Jellyfin service and the media containers, and 8:00 AM starts them again and logs UP/DOWN for each
 - DNS (Pi-hole + Unbound) and Docker Desktop are never touched

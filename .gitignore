@@ -11,3 +11,7 @@ bin/.gaming-mode-state.json
 
 # Log from the nightly downtime scripts
 bin/downtime.log
+
+jellystat/.env
+jellystat/postgres/
+jellystat/backup/
